@@ -14,6 +14,7 @@ jobs:
     env:
       TF_WORKING_DIR: terraform
       ANSIBLE_DIR: linux_tweet_deployment
+      PUBLIC_IP: 20.42.45.70
 
     steps:
       - name: Checkout repository
@@ -70,14 +71,19 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          # Generate public key for Terraform
           ssh-keygen -y -f ~/.ssh/id_rsa > terraform/linux_tweet_key.pub
+
+
+      - name: 📂 Copy project files ./vm to VM
+        run: |
+          scp -o StrictHostKeyChecking=no -r ./linux_tweet_deployment/* \
+            azureuser@$PUBLIC_IP:/
 
       - name: Run Ansible on VM
         run: |
           ssh -o StrictHostKeyChecking=no azureuser@$PUBLIC_IP << 'EOF'
+            cd /linux_tweet_deployment
             sudo apt update
-            sudo apt install -y ansible sshpass
 
             # Create inventory on the VM
             echo "[web]" > inventory
@@ -85,10 +91,6 @@ jobs:
 
             # Copy playbook to the VM if not already there
             mkdir -p ~/linux_tweet_deployment
-            cat > ~/linux_tweet_deployment/playbook.yml << 'PLAYBOOK'
-            # Paste your playbook content here
-            PLAYBOOK
 
-            # Run playbook locally on the VM
             ansible-playbook -i inventory ~/linux_tweet_deployment/playbook.yml --connection=local
           EOF
