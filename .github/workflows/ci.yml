@@ -102,9 +102,13 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
+      - name: Copy linux_tweet_deployment to VM
+        run: |
+          sshpass -p "${{ secrets.AZURE_SSH_PASS }}" scp -o StrictHostKeyChecking=no -r ./linux_tweet_deployment azureuser@${{ env.PUBLIC_IP }}:/tmp/
+
       - name: Run Ansible on VM
         run: |
-          sshpass -p "${{ secrets.AZURE_SSH_PASS }}" ssh -o StrictHostKeyChecking=no azureuser@${{ env.PUBLIC_IP }} << 'EOF' << 'EOF'
+          sshpass -p "${{ secrets.AZURE_SSH_PASS }}" ssh -o StrictHostKeyChecking=no azureuser@${{ env.PUBLIC_IP }} << 'EOF'
             cd /tmp/linux_tweet_deployment
             sudo apt update
 
@@ -112,7 +116,6 @@ jobs:
             echo "[web]" > inventory
             echo "localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3" >> inventory
 
-              # sudo openssl req -x509 -nodes -days 365 \ -newkey rsa:2048 \ -keyout /etc/ssl/linux_tweet_app/linux_tweet_app.key \ -out /etc/ssl/linux_tweet_app/linux_tweet_app.crt \ -subj "/CN=linux-tweet.example.com"
-            ansible-playbook -i inventory /tmp/linux_tweet_deployment/playbook.yml --connection=local
-          EOF
-
+            # Run playbook
+            ansible-playbook -i inventory playbook.yml --connection=local
+      EOF
