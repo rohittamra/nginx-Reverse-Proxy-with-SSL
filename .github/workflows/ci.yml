@@ -19,76 +19,89 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.5.7
+      # - name: Setup Terraform
+      #   uses: hashicorp/setup-terraform@v3
+      #   with:
+      #     terraform_version: 1.5.7
 
-      - name: Azure CLI login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Terraform Init
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -input=false
+      # - name: Azure CLI login
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # - name: Terraform Init
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      #   run: terraform init -input=false
 
-      - name: Terraform Import Existing Resources
-        working-directory: ${{ env.TF_WORKING_DIR }}
+      # - name: Terraform Import Existing Resources
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      #   run: |
+      #     terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg || true
+
+      #     terraform import azurerm_virtual_network.vnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet || true
+
+      #     terraform import azurerm_subnet.subnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet/subnets/linux-tweet-subnet || true
+
+      #     terraform import azurerm_network_security_group.nsg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkSecurityGroups/linux-tweet-nsg || true
+
+      #     terraform import azurerm_public_ip.linux_tweet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/publicIPAddresses/linux-tweet-ip || true
+
+      #     terraform import azurerm_network_interface.nic /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkInterfaces/linux-tweet-nic || true
+
+      #     terraform import azurerm_linux_virtual_machine.vm /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Compute/virtualMachines/linux-tweet-vm || true
+
+      # - name: Terraform Plan
+      #   id: plan
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      #   run: terraform plan -detailed-exitcode -no-color
+      #   continue-on-error: true
+
+      # - name: Terraform Apply
+      #   if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success'
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      #   run: terraform apply -auto-approve
+
+      # - name: Get Terraform output
+      #   id: terraform_output
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      #   run: echo "PUBLIC_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+
+      # - name: Setup SSH key
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
+      #     ssh-keygen -y -f ~/.ssh/id_rsa > terraform/linux_tweet_key.pub
+
+      # - name: 📂 Copy project files ./vm to VM
+      #   run: |
+      #     scp -o StrictHostKeyChecking=no -r ./linux_tweet_deployment/* \
+      #       azureuser@$PUBLIC_IP:/
+
+      # - name: Run Ansible on VM
+      #   run: |
+      #     ssh -o StrictHostKeyChecking=no azureuser@$PUBLIC_IP << 'EOF'
+      #       cd /linux_tweet_deployment
+      #       sudo apt update
+
+      #       # Create inventory on the VM
+      #       echo "[web]" > inventory
+      #       echo "localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3" >> inventory
+
+      #       # Copy playbook to the VM if not already there
+      #       mkdir -p ~/linux_tweet_deployment
+
+      #       ansible-galaxy collection install community.docker
+
+      #       ansible-playbook -i inventory ~/linux_tweet_deployment/playbook.yml --connection=local
+      #     EOF
+
+
+      - name: 🐳 Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" |  docker login -u rohit17061997 --password-stdin
+
+      - name: 🐳 Build & Push Docker Nest Image
         run: |
-          terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg || true
-
-          terraform import azurerm_virtual_network.vnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet || true
-
-          terraform import azurerm_subnet.subnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet/subnets/linux-tweet-subnet || true
-
-          terraform import azurerm_network_security_group.nsg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkSecurityGroups/linux-tweet-nsg || true
-
-          terraform import azurerm_public_ip.linux_tweet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/publicIPAddresses/linux-tweet-ip || true
-
-          terraform import azurerm_network_interface.nic /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkInterfaces/linux-tweet-nic || true
-
-          terraform import azurerm_linux_virtual_machine.vm /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Compute/virtualMachines/linux-tweet-vm || true
-
-      - name: Terraform Plan
-        id: plan
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform plan -detailed-exitcode -no-color
-        continue-on-error: true
-
-      - name: Terraform Apply
-        if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success'
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve
-
-      - name: Get Terraform output
-        id: terraform_output
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: echo "PUBLIC_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
-
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keygen -y -f ~/.ssh/id_rsa > terraform/linux_tweet_key.pub
-
-      - name: 📂 Copy project files ./vm to VM
-        run: |
-          scp -o StrictHostKeyChecking=no -r ./linux_tweet_deployment/* \
-            azureuser@$PUBLIC_IP:/
-
-      - name: Run Ansible on VM
-        run: |
-          ssh -o StrictHostKeyChecking=no azureuser@$PUBLIC_IP << 'EOF'
-            cd /linux_tweet_deployment
-            sudo apt update
-
-            # Create inventory on the VM
-            echo "[web]" > inventory
-            echo "localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3" >> inventory
-
-            # Copy playbook to the VM if not already there
-            mkdir -p ~/linux_tweet_deployment
-
-            ansible-playbook -i inventory ~/linux_tweet_deployment/playbook.yml --connection=local
-          EOF
+          IMAGE_TAG="rohit17061997/linux_tweet_app:latest"
+          docker build -t "$IMAGE_TAG" .
+          echo "Deploying version: ${{ needs.generate-tag.outputs.image_tag }}"
+          docker push "$IMAGE_TAG"

@@ -1,2 +1,2 @@
 [web]
-20.42.45.70 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa
+localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
