@@ -83,7 +83,7 @@ jobs:
         run: echo "PUBLIC_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
 
   ansible:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
       - name: Get VM public IP
         run: |
