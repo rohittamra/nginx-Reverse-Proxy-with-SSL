@@ -49,10 +49,6 @@ jobs:
 
           terraform import azurerm_linux_virtual_machine.vm /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Compute/virtualMachines/linux-tweet-vm || true
 
-          terraform import azurerm_network_interface_security_group_association.nsg_assoc \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkInterfaces/linux-tweet-nic \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkSecurityGroups/linux-tweet-nsg || true
-
       - name: Terraform Plan
         id: plan
         working-directory: ${{ env.TF_WORKING_DIR }}
