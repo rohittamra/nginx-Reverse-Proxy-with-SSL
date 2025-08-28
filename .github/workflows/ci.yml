@@ -34,10 +34,13 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
+        id: plan
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform plan
+        run: terraform plan -detailed-exitcode -no-color
+        continue-on-error: true
 
       - name: Terraform Apply
+        if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success'
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve
 
