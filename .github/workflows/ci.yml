@@ -42,6 +42,9 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Check Azure login
+        run: az account show
+
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -input=false
@@ -82,8 +85,13 @@ jobs:
   ansible:
     runs-on: ubuntu
     steps:
-      - name: exporting env
-        run: export PUBLIC_IP=terraform_output.public_ip
+      - name: Get VM public IP
+        run: |
+          PUBLIC_IP=$(az network public-ip show \
+            --resource-group linux-tweet-rg \
+            --name linux-tweet-ip \
+            --query ipAddress -o tsv)
+          echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
 
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
