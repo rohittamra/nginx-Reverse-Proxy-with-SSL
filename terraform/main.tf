@@ -23,6 +23,11 @@ resource "azurerm_virtual_network" "vnet" {
   resource_group_name = azurerm_resource_group.rg.name
 }
 
+resource "tls_private_key" "ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 resource "azurerm_subnet" "subnet" {
   name                 = "linux-tweet-subnet"
   resource_group_name  = azurerm_resource_group.rg.name
@@ -91,20 +96,19 @@ resource "azurerm_network_interface" "nic" {
     public_ip_address_id          = azurerm_public_ip.linux_tweet.id
   }
 }
-
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = var.vm_name
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   size                = "Standard_B1s"
-  admin_username      = var.admin_username
+  admin_username      = "azureuser"
   network_interface_ids = [
     azurerm_network_interface.nic.id,
   ]
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file(var.public_key_path)
+    public_key = tls_private_key.ssh.public_key_openssh
   }
 
   os_disk {
@@ -118,7 +122,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = "20_04-lts"
     version   = "latest"
   }
-
 }
 
 resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
