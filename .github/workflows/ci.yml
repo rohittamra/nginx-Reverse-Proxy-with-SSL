@@ -14,7 +14,6 @@ jobs:
     env:
       TF_WORKING_DIR: terraform
       ANSIBLE_DIR: linux_tweet_deployment
-      PUBLIC_IP: 20.42.45.70
 
     steps:
       - name: Checkout repository
@@ -49,6 +48,11 @@ jobs:
           terraform import azurerm_network_interface.nic /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkInterfaces/linux-tweet-nic || true
 
           terraform import azurerm_linux_virtual_machine.vm /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Compute/virtualMachines/linux-tweet-vm || true
+
+          terraform import azurerm_network_interface_security_group_association.nsg_assoc \
+            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkInterfaces/linux-tweet-nic \
+            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkSecurityGroups/linux-tweet-nsg
+
 
       - name: Terraform Plan
         id: plan
