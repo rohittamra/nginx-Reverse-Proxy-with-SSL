@@ -79,19 +79,18 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: echo "PUBLIC_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
 
+  ansible:
+    runs-on: ubuntu
+    steps:
+      - name: exporting env
+        run: export PUBLIC_IP=terraform_output.public_ip
+
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: SSH into Azure VM and deploy
-        run: |
-          sshpass -p "${{ secrets.AZURE_SSH_PASS }}" ssh -o StrictHostKeyChecking=no azureuser@$PUBLIC_IP << 'EOF'
-            cd /linux_tweet_deployment
-            # your commands here, e.g. docker-compose up -d
-          EOF
-
       - name: Run Ansible on VM
         run: |
-          sshpass -p "${{ secrets.AZURE_SSH_PASS }}" ssh -o StrictHostKeyChecking=no azureuser@$PUBLIC_IP << 'EOF'
+          sshpass -p "${{ secrets.AZURE_SSH_PASS }}" ssh -o StrictHostKeyChecking=no azureuser@${{ env.PUBLIC_IP }} << 'EOF' << 'EOF'
             cd /tmp/linux_tweet_deployment
             sudo apt update
 
