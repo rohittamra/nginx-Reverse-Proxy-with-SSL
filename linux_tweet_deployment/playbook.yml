@@ -72,8 +72,14 @@
         creates: "/etc/ssl/linux_tweet_app/linux_tweet_app.crt"
       when: domain_name == "localhost"
 
-  handlers:
-    - name: Restart NGINX
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Ensure NGINX is enabled and running
       service:
         name: nginx
-        state: restarted
+        state: started
+        enabled: true
