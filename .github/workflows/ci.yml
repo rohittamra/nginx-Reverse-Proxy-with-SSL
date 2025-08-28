@@ -1,0 +1,66 @@
+---
+name: NGINX Reverse Proxy with SSL
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_terraform_and_ansible:
+    runs-on: ubuntu-latest
+
+    env:
+      TF_WORKING_DIR: terraform
+      ANSIBLE_DIR: linux_tweet_deployment
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Azure CLI login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform plan
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve
+
+      - name: Get Terraform output
+        id: terraform_output
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: echo "public_ip=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible sshpass
+
+      - name: Create Ansible Inventory
+        run: |
+          echo "[web]" > inventory
+          echo "$PUBLIC_IP ansible_user=azureuser ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_python_interpreter=/usr/bin/python3" >> inventory
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook -i inventory linux_tweet_deployment/playbook.yml --ssh-extra-args='-o StrictHostKeyChecking=no'
