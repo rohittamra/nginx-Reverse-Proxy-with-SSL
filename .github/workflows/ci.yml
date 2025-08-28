@@ -99,7 +99,8 @@ jobs:
       - name: 🐳 Login to Docker Hub
         run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" |  docker login -u rohit17061997 --password-stdin
 
-      - name: 🐳 Build & Push Docker Nest Image
+      - name: 🐳 Build & Push Docker Image
+        working-directory: application
         run: |
           IMAGE_TAG="rohit17061997/linux_tweet_app:latest"
           docker build -t "$IMAGE_TAG" .
