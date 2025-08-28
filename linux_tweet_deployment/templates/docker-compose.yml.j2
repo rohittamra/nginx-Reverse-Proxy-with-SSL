@@ -1,0 +1,9 @@
+version: "3.3"
+
+services:
+  linux_tweet_app:
+    image: "{{ app_image }}"
+    container_name: linux_tweet_app
+    restart: always
+    ports:
+      - "8080:80"

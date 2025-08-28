@@ -1,11 +1,12 @@
 ---
-- name: Deploy linux_tweet_app with NGINX + Let's Encrypt
+- name: Deploy linux_tweet_app with Docker Compose
   hosts: web
   become: true
 
   vars:
+    app_image: "rohit17061997/linux_tweet_app"
     domain_name: "localhost"
-    app_image: "dockersamples/linux_tweet_app:latest"
+    email: "engr.rohittamra@gmail.com"
 
   tasks:
     - name: Install required packages
@@ -14,14 +15,23 @@
         state: present
         update_cache: yes
 
-    - name: Start linux_tweet_app container
-      community.docker.docker_container:
-        name: linux_tweet_app
-        image: "{{ app_image }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "8080:80"   # App listens internally on port 8080
+    - name: Ensure deployment directory exists
+      file:
+        path: /opt/linux_tweet_app
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create Docker Compose file
+      template:
+        src: docker-compose.yml.j2
+        dest: /opt/linux_tweet_app/docker-compose.yml
+
+    - name: Start linux_tweet_app with Docker Compose
+      command: docker-compose up -d
+      args:
+        chdir: /opt/linux_tweet_app
 
     - name: Create NGINX config
       template:
@@ -42,3 +52,20 @@
         path: /etc/nginx/sites-enabled/default
         state: absent
       notify: Restart NGINX
+
+    - name: Generate self-signed certificate for testing
+      command: >
+        openssl req -x509 -nodes -days 365
+        -newkey rsa:2048
+        -keyout /etc/ssl/linux_tweet_app/linux_tweet_app.key
+        -out /etc/ssl/linux_tweet_app/linux_tweet_app.crt
+        -subj "/CN={{ domain_name }}"
+      args:
+        creates: "/etc/ssl/linux_tweet_app/linux_tweet_app.crt"
+      when: domain_name == "localhost"
+
+  handlers:
+    - name: Restart NGINX
+      service:
+        name: nginx
+        state: restarted
