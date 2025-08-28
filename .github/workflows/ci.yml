@@ -49,22 +49,22 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -input=false
 
-      - name: Terraform Import Existing Resources
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: |
-          terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg || true
+      # - name: Terraform Import Existing Resources
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      #   run: |
+      #     terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg || true
 
-          terraform import azurerm_virtual_network.vnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet || true
+      #     terraform import azurerm_virtual_network.vnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet || true
 
-          terraform import azurerm_subnet.subnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet/subnets/linux-tweet-subnet || true
+      #     terraform import azurerm_subnet.subnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet/subnets/linux-tweet-subnet || true
 
-          terraform import azurerm_network_security_group.nsg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkSecurityGroups/linux-tweet-nsg || true
+      #     terraform import azurerm_network_security_group.nsg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkSecurityGroups/linux-tweet-nsg || true
 
-          terraform import azurerm_public_ip.linux_tweet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/publicIPAddresses/linux-tweet-ip || true
+      #     terraform import azurerm_public_ip.linux_tweet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/publicIPAddresses/linux-tweet-ip || true
 
-          terraform import azurerm_network_interface.nic /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkInterfaces/linux-tweet-nic || true
+      #     terraform import azurerm_network_interface.nic /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkInterfaces/linux-tweet-nic || true
 
-          terraform import azurerm_linux_virtual_machine.vm /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Compute/virtualMachines/linux-tweet-vm || true
+      #     terraform import azurerm_linux_virtual_machine.vm /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Compute/virtualMachines/linux-tweet-vm || true
 
       - name: Terraform Plan
         id: plan
