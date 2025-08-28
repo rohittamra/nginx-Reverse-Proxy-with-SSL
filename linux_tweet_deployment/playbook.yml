@@ -53,6 +53,14 @@
         state: absent
       notify: Restart NGINX
 
+    - name: Ensure SSL directory exists
+      file:
+        path: /etc/ssl/linux_tweet_app
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
     - name: Generate self-signed certificate for testing
       command: >
         openssl req -x509 -nodes -days 365
