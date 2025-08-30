@@ -22,69 +22,69 @@ jobs:
   #         echo "Deploying version: ${{ needs.generate-tag.outputs.image_tag }}"
   #         docker push "$IMAGE_TAG"
 
-  # deploy_terraform_and_ansible:
-  #   runs-on: ubuntu-latest
+  deploy_terraform_and_ansible:
+    runs-on: ubuntu-latest
 
-  #   env:
-  #     TF_WORKING_DIR: terraform
-  #     ANSIBLE_DIR: linux_tweet_deployment
+    env:
+      TF_WORKING_DIR: terraform
+      ANSIBLE_DIR: linux_tweet_deployment
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: Setup Terraform
-  #       uses: hashicorp/setup-terraform@v3
-  #       with:
-  #         terraform_version: 1.5.7
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
 
-  #     - name: Azure CLI login
-  #       uses: azure/login@v1
-  #       with:
-  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
-  #     - name: Check Azure login
-  #       run: az account show
+      - name: Azure CLI login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Check Azure login
+        run: az account show
 
-  #     - name: Terraform Init
-  #       working-directory: ${{ env.TF_WORKING_DIR }}
-  #       run: terraform init -input=false
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init -input=false
 
-  #     # - name: Terraform Import Existing Resources
-  #     #   working-directory: ${{ env.TF_WORKING_DIR }}
-  #     #   run: |
-  #     #     terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg || true
+      # - name: Terraform Import Existing Resources
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      #   run: |
+      #     terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg || true
 
-  #     #     terraform import azurerm_virtual_network.vnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet || true
+      #     terraform import azurerm_virtual_network.vnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet || true
 
-  #     #     terraform import azurerm_subnet.subnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet/subnets/linux-tweet-subnet || true
+      #     terraform import azurerm_subnet.subnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/virtualNetworks/linux-tweet-vnet/subnets/linux-tweet-subnet || true
 
-  #     #     terraform import azurerm_network_security_group.nsg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkSecurityGroups/linux-tweet-nsg || true
+      #     terraform import azurerm_network_security_group.nsg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkSecurityGroups/linux-tweet-nsg || true
 
-  #     #     terraform import azurerm_public_ip.linux_tweet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/publicIPAddresses/linux-tweet-ip || true
+      #     terraform import azurerm_public_ip.linux_tweet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/publicIPAddresses/linux-tweet-ip || true
 
-  #     #     terraform import azurerm_network_interface.nic /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkInterfaces/linux-tweet-nic || true
+      #     terraform import azurerm_network_interface.nic /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Network/networkInterfaces/linux-tweet-nic || true
 
-  #     #     terraform import azurerm_linux_virtual_machine.vm /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Compute/virtualMachines/linux-tweet-vm || true
+      #     terraform import azurerm_linux_virtual_machine.vm /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/linux-tweet-rg/providers/Microsoft.Compute/virtualMachines/linux-tweet-vm || true
 
-  #     - name: Terraform Plan
-  #       id: plan
-  #       working-directory: ${{ env.TF_WORKING_DIR }}
-  #       run: terraform plan -detailed-exitcode -no-color -var="admin_password=${{ secrets.AZURE_SSH_PASS }}"
-  #       continue-on-error: true
+      - name: Terraform Plan
+        id: plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform plan -detailed-exitcode -no-color -var="admin_password=${{ secrets.AZURE_SSH_PASS }}"
+        continue-on-error: true
 
-  #     - name: Terraform Apply
-  #       if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success'
-  #       working-directory: ${{ env.TF_WORKING_DIR }}
-  #       run: terraform apply -auto-approve -var="admin_password=${{ secrets.AZURE_SSH_PASS }}"
+      - name: Terraform Apply
+        if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success'
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve -var="admin_password=${{ secrets.AZURE_SSH_PASS }}"
 
-  #     - name: Get Terraform output
-  #       id: terraform_output
-  #       working-directory: ${{ env.TF_WORKING_DIR }}
-  #       run: echo "PUBLIC_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+      - name: Get Terraform output
+        id: terraform_output
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: echo "PUBLIC_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
 
   ansible:
     runs-on: ubuntu-latest
-    # needs: deploy_terraform_and_ansible
+    needs: deploy_terraform_and_ansible
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -1,17 +1,22 @@
----
 - name: Deploy linux_tweet_app with Docker Compose
   hosts: web
   become: true
 
   vars:
     app_image: "rohit17061997/linux_tweet_app"
-    domain_name: "localhost"
+    domain_name: "rohittamra.pro"   # must point to your VM public IP
     email: "engr.rohittamra@gmail.com"
 
   tasks:
     - name: Install required packages
       apt:
-        name: [docker.io, docker-compose, python3-pip, certbot, python3-certbot-nginx]
+        name:
+          - docker.io
+          - docker-compose
+          - python3-pip
+          - certbot
+          - python3-certbot-nginx
+          - nginx
         state: present
         update_cache: yes
 
@@ -53,6 +58,12 @@
         state: absent
       notify: Restart NGINX
 
+    - name: Ensure NGINX is enabled and running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
     - name: Ensure SSL directory exists
       file:
         path: /etc/ssl/linux_tweet_app
@@ -60,6 +71,7 @@
         owner: root
         group: root
         mode: '0755'
+      when: domain_name == "localhost"
 
     - name: Generate self-signed certificate for testing
       command: >
@@ -72,14 +84,18 @@
         creates: "/etc/ssl/linux_tweet_app/linux_tweet_app.crt"
       when: domain_name == "localhost"
 
-    - name: Install NGINX
-      apt:
-        name: nginx
-        state: present
-        update_cache: yes
+    - name: Obtain Let's Encrypt certificate
+      command: >
+        certbot --nginx -n --agree-tos
+        -m {{ email }}
+        -d {{ domain_name }}
+      args:
+        creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+      notify: Restart NGINX
+      when: domain_name != "localhost"
 
-    - name: Ensure NGINX is enabled and running
+  handlers:
+    - name: Restart NGINX
       service:
         name: nginx
-        state: started
-        enabled: true
+        state: restarted
