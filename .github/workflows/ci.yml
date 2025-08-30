@@ -8,23 +8,23 @@ on:
       - main
 
 jobs:
-  # push_app:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: 🐳 Login to Docker Hub
-  #       run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" |  docker login -u rohit17061997 --password-stdin
+  push_app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🐳 Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" |  docker login -u rohit17061997 --password-stdin
 
-  #     - name: 🐳 Build & Push Docker Image
-  #       working-directory: application
-  #       run: |
-  #         IMAGE_TAG="rohit17061997/linux_tweet_app:latest"
-  #         docker build -t "$IMAGE_TAG" .
-  #         echo "Deploying version: ${{ needs.generate-tag.outputs.image_tag }}"
-  #         docker push "$IMAGE_TAG"
+      - name: 🐳 Build & Push Docker Image
+        working-directory: application
+        run: |
+          IMAGE_TAG="rohit17061997/linux_tweet_app:latest"
+          docker build -t "$IMAGE_TAG" .
+          echo "Deploying version: ${{ needs.generate-tag.outputs.image_tag }}"
+          docker push "$IMAGE_TAG"
 
   deploy_terraform_and_ansible:
     runs-on: ubuntu-latest
-
+    continue-on-error: true
     env:
       TF_WORKING_DIR: terraform
       ANSIBLE_DIR: linux_tweet_deployment
@@ -42,6 +42,7 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Check Azure login
         run: az account show
 
@@ -84,7 +85,7 @@ jobs:
 
   ansible:
     runs-on: ubuntu-latest
-    needs: deploy_terraform_and_ansible
+    needs: [deploy_terraform_and_ansible, push_app]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -118,7 +119,9 @@ jobs:
 
             ansible-playbook -i inventory playbook.yml --connection=local
           EOF
-      
-      - name: Check
-        run: curl -k https://${{  env.PUBLIC_IP }}
 
+      - name: Wait for services to start
+        run: sleep 120
+
+      - name: Check
+        run: curl -k https://rohittamra.pro

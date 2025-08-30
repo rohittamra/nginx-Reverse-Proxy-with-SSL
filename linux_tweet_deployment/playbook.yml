@@ -4,7 +4,7 @@
 
   vars:
     app_image: "rohit17061997/linux_tweet_app"
-    domain_name: "rohittamra.pro"   # must point to your VM public IP
+    domain_name: "rohittamra.pro"
     email: "engr.rohittamra@gmail.com"
 
   tasks:
