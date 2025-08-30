@@ -31,6 +31,8 @@ git clone <repo-url>
 cd <repo-name>
 ```
 
+Push it to your own repository.
+
 2. Run the actions manually which will creeate below workflow
 
 ## Workflow:
@@ -70,6 +72,7 @@ cd <repo-name>
 
 ## Tools Used
 
+
 ### Terraform
 - Creates the **Azure infrastructure**:
   - Linux VM
@@ -107,9 +110,11 @@ cd <repo-name>
 
 ## Final output
 
+
 <img width="2640" height="1618" alt="image" src="https://github.com/user-attachments/assets/9d8989eb-fd26-4c8e-b522-6b5ef4e635ad" />
 
 ## Future Development
+
 
 - On the first run, the workflow may fail at the final stage when obtaining a Let's Encrypt certificate.  
 - This happens because the domain's DNS (e.g., in GoDaddy) must point to the public IP of the Azure VM.  
