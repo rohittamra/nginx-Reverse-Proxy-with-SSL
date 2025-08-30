@@ -103,3 +103,8 @@ cd <repo-name>
 - Provides **free SSL/TLS certificates** for the domain
 - Ensures all HTTP requests are **redirected to HTTPS**
 - Automatically renews certificates
+
+
+## Final output
+
+<img width="2640" height="1618" alt="image" src="https://github.com/user-attachments/assets/9d8989eb-fd26-4c8e-b522-6b5ef4e635ad" />
