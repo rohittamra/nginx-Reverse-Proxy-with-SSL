@@ -108,3 +108,10 @@ cd <repo-name>
 ## Final output
 
 <img width="2640" height="1618" alt="image" src="https://github.com/user-attachments/assets/9d8989eb-fd26-4c8e-b522-6b5ef4e635ad" />
+
+## Future Development
+
+- On the first run, the workflow may fail at the final stage when obtaining a Let's Encrypt certificate.  
+- This happens because the domain's DNS (e.g., in GoDaddy) must point to the public IP of the Azure VM.  
+- Once the DNS is correctly configured(take few minutes), subsequent runs will successfully issue and deploy the SSL/TLS certificate.
+
