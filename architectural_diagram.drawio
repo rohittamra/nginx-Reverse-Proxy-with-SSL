@@ -49,13 +49,13 @@
         <mxCell id="m8yyXpN5D5giGVDlu26I-26" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="-149" y="114" width="819" height="250" as="geometry" />
         </mxCell>
-        <mxCell id="m8yyXpN5D5giGVDlu26I-20" value="Docker Engine &amp;amp; Docker-compose" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="m8yyXpN5D5giGVDlu26I-20" value="Docker Engine &amp;amp; Docker-compose&lt;br&gt;(application)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="-109.5" y="136" width="380" height="90" as="geometry" />
         </mxCell>
         <mxCell id="m8yyXpN5D5giGVDlu26I-21" value="NGINX Reverse Proxy&lt;br&gt;- Listem 80/443" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="-109.5" y="251" width="380" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="m8yyXpN5D5giGVDlu26I-29" value="Certificate for signing&lt;br&gt;(certbot)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="m8yyXpN5D5giGVDlu26I-29" value="Certificate for signing&lt;br&gt;(Let&#39;s encrypt)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="340" y="251" width="290" height="89" as="geometry" />
         </mxCell>
         <mxCell id="m8yyXpN5D5giGVDlu26I-33" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
