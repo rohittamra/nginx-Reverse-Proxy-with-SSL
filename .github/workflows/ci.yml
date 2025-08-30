@@ -11,6 +11,9 @@ jobs:
   push_app:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: 🐳 Login to Docker Hub
         run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" |  docker login -u rohit17061997 --password-stdin
 
