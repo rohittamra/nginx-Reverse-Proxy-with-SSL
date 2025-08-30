@@ -6,7 +6,7 @@ Deploy a simple web application (`linux_tweet_app`) in a Docker container on Azu
 ---
 
 ## Acrichtectural diagram
-<img width="7000" height="1380" alt="image" src="https://github.com/user-attachments/assets/e21dae77-6341-4777-ab87-fb2968c2aac5" />
+<img width="1730" height="325" alt="image" src="https://github.com/user-attachments/assets/e8bfe7ec-c139-4d1d-a6f5-b88a957c3ac8" />
 
 ## Prerequisites
 
